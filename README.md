@@ -1,7 +1,7 @@
 # ButterflyMaker
 A Glyph script that converts H topology structured blocks into O-H (butterfly) topologies. 
 
-![ScriptImage](https://raw.github.com/pointwise/ButterflyMaker/master/ScriptImage.png)
+![ScriptImage](https://raw.github.com/pointwise/ButterflyMaker/master/TkGUI.png)
 
 ## Selection
 Upon starting the script, all currently available structured blocks will be listed in the selection box on the left. Before the script can be run, structured block(s) must be selected for conversion. Blocks may be selected through the provided list box. Alternatively, blocks may be selected interactively by using the "Click to Select Interactively" button. Block Groups are also listed in the selection box (with prefix GROUP); however, if the group contains unstructured blocks, only the structured blocks will be operated upon.
