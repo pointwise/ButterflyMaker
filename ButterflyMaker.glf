@@ -589,22 +589,22 @@ proc blkMakeBflyDomains { blk dir domVar } {
   # Determine the other 2 indices (J and K) of H domain given one (I) of 
   # butterfly faces. 
   #
-  # 	Jmax	o---------------o		o---------------o 
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #		|ind1_max	|		|ind2_min	|	
-  #		|   o-------o	|		|   o-------o	|	
-  #		|   |	    |	|		|   |	    |	|	
-  #J index of H	|   |	    |	|		|   |	    |	| K index of H	
-  #		|   |	    |	|		|   |	    |	|	
-  #		|   o-------o	|		|   o-------o	|	
-  #		|ind1_min	|		|	ind2_max|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #	Jmin=1	o---------------o	Kmin=1	o---------------o   Kmax
+  #     Jmax    o---------------o               o---------------o 
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #             |ind1_max       |               |ind2_min       |        
+  #             |   o-------o   |               |   o-------o   |        
+  #             |   |       |   |               |   |       |   |        
+  #J index of H |   |       |   |               |   |       |   | K index of H        
+  #             |   |       |   |               |   |       |   |        
+  #             |   o-------o   |               |   o-------o   |        
+  #             |ind1_min       |               |       ind2_max|        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #     Jmin=1  o---------------o       Kmin=1  o---------------o   Kmax
   #
-  #		Imin butterfly face		Imax butterfly face
+  #                Imin butterfly face                Imax butterfly face
   #
   #
 
@@ -1011,21 +1011,22 @@ proc HDomLocator { blk dir max1 max2 ind3_min ind3_max } {
   # faces. 
   #
   #
-  #     		index3	 index4
-  # 	Jmax	o---?-------?---o		o---------------o 
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #	index2	?   o-------o	|		|   o-------o	|	
-  #		|   |	    |	|		|   |	    |	|	
-  #		|   |	    |	|		|   |	    |	| 
-  #		|   |	    |	|		|   |	    |	|	
-  #	index1	?   o-------o	|		|   o-------o	|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #		|		|		|		|	
-  #	Jmin=1	o---------------o	Kmin=1	o---------------o   Kmax
+  #                     index3   index4
+  #     Jmax    o---?-------?---o               o---------------o 
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #     index2  ?   o-------o   |               |   o-------o   |        
+  #             |   |       |   |               |   |       |   |        
+  #             |   |       |   |               |   |       |   | 
+  #             |   |       |   |               |   |       |   |        
+  #     index1  ?   o-------o   |               |   o-------o   |        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #             |               |               |               |        
+  #     Jmin=1  o---------------o       Kmin=1  o---------------o   Kmax
+  #
   #
   # Obtain the grid points, index 1~4, and use their JK indices to locate the 
   # H region.
@@ -1521,17 +1522,17 @@ proc updateGuiState {{clearSelection false}} {
   global Job_Running Last_Job_Type Propagate Direction ListBoxSelectableItems
 
   if {!$Job_Running} {
-    # Update GUI selectable blocks
-    set ListBoxSelectableItems [getSelectionList true true]
+    if [string equal $Last_Job_Type "Transform"] {
+      # Update GUI selectable blocks
+      set ListBoxSelectableItems [getSelectionList true true]
 
-    if {[string compare $Last_Job_Type "Transform"] == 0} {
       # If a job has been applied
       setGuiState disabled
       .right.top.list configure -state normal
       .bottom.buttons.ok configure -state normal
       .bottom.buttons.cancel configure -state normal
       .right.select configure -state normal
-      if {$clearSelection} {
+      if $clearSelection {
         .right.top.list selection clear 0 end
       }
     } 
@@ -1628,7 +1629,7 @@ proc highlightBlockCons { blkList colorMode color width } {
 proc ldifference {a b} {
   set result {}
   foreach e $a {
- 	  if {$e ni $b} {lappend result $e}
+    if {$e ni $b} {lappend result $e}
   }
   return $result
 }
@@ -2207,6 +2208,31 @@ proc getSelectionList { makePrintable returnGroups } {
   return $printableList
 }
 
+#################################################################################
+# preselectBlocks: 
+# -Checks if any structured blocks have been selected before script is run
+# -Selects these blocks in the listbox
+#################################################################################
+proc preselectBlocks { } {
+  global ListBoxSelectableItems
+
+  # Update GUI selectable blocks
+  set ListBoxSelectableItems [getSelectionList true true]
+
+  pw::Display getSelectedEntities ents
+        
+  foreach blk $ents(Blocks) {
+    if [$blk isOfType pw::BlockStructured] {
+      # Name of the block as it appears in the List Tab
+      set blkName [$blk getName]
+      # Finds the index of selected block in the listbox 
+      set blkStrucIndex [lsearch $ListBoxSelectableItems $blkName]
+      # Selects the block in the listbox 
+      .right.top.list select set $blkStrucIndex
+    }
+  }
+}
+
 ###############################################################################
 # setCreatorState: 
 # - If possible, sets creator state according to input parameter "state" 
@@ -2579,7 +2605,7 @@ pw::Display update
 # Align all blocks to begin with. This keeps things consistent
 buildAlignList
 orientBlocks
-
+preselectBlocks
 # Initial Gui State update
 updateGuiState
 
